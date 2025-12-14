@@ -1,0 +1,88 @@
+#include <GL/glut.h>
+#include <stdio.h>
+#include <math.h>
+
+/* Global variables for line endpoints */
+int xStart, yStart, xEnd, yEnd;
+
+/* Display callback function */
+void drawLineDDA()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glPointSize(7.0f);
+    glBegin(GL_POINTS);
+
+    int dx = xEnd - xStart;
+    int dy = yEnd - yStart;
+
+    float slope = (float)dy / dx;
+
+    float x = xStart;
+    float y = yStart;
+
+    printf("\n--- DDA Line Drawing Algorithm (Slope-Based Approach) ---\n");
+    printf("dx = %d, dy = %d, slope = %.2f\n", dx, dy, slope);
+    printf("Step\tX(float)\tY(float)\tX(round)\tY(round)\n");
+    printf("----------------------------------------------------------\n");
+
+    /* Case 1: |slope| <= 1 */
+    if (fabs(slope) <= 1.0f) {
+        int stepCount = abs(dx);
+        int xStep = (dx >= 0) ? 1 : -1;
+        float yStep = slope * xStep;
+
+        for (int i = 0; i <= stepCount; i++) {
+            printf("%d\t%.2f\t\t%.2f\t\t%d\t\t%d\n",
+                   i, x, y, (int)round(x), (int)round(y));
+            glVertex2i(round(x), round(y));
+            x += xStep;
+            y += yStep;
+        }
+    }
+    /* Case 2: |slope| > 1 */
+    else {
+        int stepCount = abs(dy);
+        int yStep = (dy >= 0) ? 1 : -1;
+        float xStep = (1.0f / slope) * yStep;
+
+        for (int i = 0; i <= stepCount; i++) {
+            printf("%d\t%.2f\t\t%.2f\t\t%d\t\t%d\n",
+                   i, x, y, (int)round(x), (int)round(y));
+            glVertex2i(round(x), round(y));
+            x += xStep;
+            y += yStep;
+        }
+    }
+
+    glEnd();
+    glFlush();
+}
+
+/* Initialization function */
+void setup()
+{
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    gluOrtho2D(0, 50, 0, 50);
+}
+
+/* Main function */
+int main(int argc, char** argv)
+{
+    printf("Enter starting coordinates (x y): ");
+    scanf("%d %d", &xStart, &yStart);
+
+    printf("Enter ending coordinates (x y): ");
+    scanf("%d %d", &xEnd, &yEnd);
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(500, 500);
+    glutCreateWindow("DDA Line Drawing using Slope Logic");
+
+    setup();
+    glutDisplayFunc(drawLineDDA);
+    glutMainLoop();
+
+    return 0;
+}
