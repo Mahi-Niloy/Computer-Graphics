@@ -1,0 +1,104 @@
+#include <GL/glut.h>
+#include <math.h>
+#include <stdio.h>
+
+/* Original rectangle coordinates */
+float px[4] = {-0.3f,  0.3f,  0.3f, -0.3f};
+float py[4] = {-0.2f, -0.2f,  0.2f,  0.2f};
+
+int option;
+float tx, ty, sx, sy, theta, shx, shy;
+int reflectAxis;
+
+/* Transformation functions */
+void applyTranslation(float *x, float *y) {
+    *x += tx;
+    *y += ty;
+}
+
+void applyScaling(float *x, float *y) {
+    *x *= sx;
+    *y *= sy;
+}
+
+void applyRotation(float *x, float *y) {
+    float rad = theta * M_PI / 180.0;
+    float xNew = (*x) * cos(rad) - (*y) * sin(rad);
+    float yNew = (*x) * sin(rad) + (*y) * cos(rad);
+    *x = xNew;
+    *y = yNew;
+}
+
+void applyShearing(float *x, float *y) {
+    float xNew = *x + shx * (*y);
+    float yNew = *y + shy * (*x);
+    *x = xNew;
+    *y = yNew;
+}
+
+void applyReflection(float *x, float *y) {
+    if (reflectAxis == 0)
+        *y = -(*y);
+    else
+        *x = -(*x);
+}
+
+/* Draw rectangle */
+void drawShape(float x[], float y[]) {
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < 4; i++)
+        glVertex2f(x[i], y[i]);
+    glEnd();
+}
+
+/* Display transformed object */
+void displayTransformed() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    float x[4], y[4];
+    for (int i = 0; i < 4; i++) {
+        x[i] = px[i];
+        y[i] = py[i];
+
+        if (option == 1) applyTranslation(&x[i], &y[i]);
+        else if (option == 2) applyScaling(&x[i], &y[i]);
+        else if (option == 3) applyRotation(&x[i], &y[i]);
+        else if (option == 4) applyShearing(&x[i], &y[i]);
+        else if (option == 5) applyReflection(&x[i], &y[i]);
+    }
+
+    drawShape(x, y);
+    glFlush();
+}
+
+/* Display original object */
+void displayOriginal() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    drawShape(px, py);
+    glFlush();
+}
+
+int main(int argc, char **argv) {
+
+    printf("Select Transformation:\n");
+    printf("1. Translation\n2. Scaling\n3. Rotation\n4. Shearing\n5. Reflection\n");
+    scanf("%d", &option);
+
+    if (option == 1) scanf("%f %f", &tx, &ty);
+    else if (option == 2) scanf("%f %f", &sx, &sy);
+    else if (option == 3) scanf("%f", &theta);
+    else if (option == 4) scanf("%f %f", &shx, &shy);
+    else if (option == 5) scanf("%d", &reflectAxis);
+
+    glutInit(&argc, argv);
+    glutInitWindowSize(500, 500);
+
+    glutCreateWindow("Original Object");
+    glutDisplayFunc(displayOriginal);
+
+    glutCreateWindow("Transformed Object");
+    glutDisplayFunc(displayTransformed);
+
+    glutMainLoop();
+    return 0;
+}
