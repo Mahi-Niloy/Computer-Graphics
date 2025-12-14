@@ -1,0 +1,91 @@
+#include <GL/glut.h>
+#include <math.h>
+
+/* Rotation angle for wheels */
+float wheelAngle = 0.0f;
+
+/* Function to draw a rotating hexagonal wheel */
+void drawWheel(float cx, float cy, float radius, float angle)
+{
+    glPushMatrix();
+
+    /* Move to wheel center */
+    glTranslatef(cx, cy, 0.0f);
+    /* Rotate wheel */
+    glRotatef(angle, 0.0f, 0.0f, 1.0f);
+    /* Move back */
+    glTranslatef(-cx, -cy, 0.0f);
+
+    glBegin(GL_POLYGON);
+    for (int i = 0; i < 6; i++) {
+        float theta = i * 60.0f * (3.1416f / 180.0f);
+        float x = cx + radius * cos(theta);
+        float y = cy + radius * sin(theta);
+        glVertex2f(x, y);
+    }
+    glEnd();
+
+    glPopMatrix();
+}
+
+/* Display function */
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    /* Draw car body */
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glBegin(GL_QUADS);
+        glVertex2f(-0.3f, 0.1f);
+        glVertex2f( 0.9f, 0.1f);
+        glVertex2f( 0.9f,-0.1f);
+        glVertex2f(-0.3f,-0.1f);
+    glEnd();
+
+    glBegin(GL_QUADS);
+        glVertex2f(-0.1f, 0.3f);
+        glVertex2f( 0.5f, 0.3f);
+        glVertex2f( 0.7f, 0.1f);
+        glVertex2f(-0.2f, 0.1f);
+    glEnd();
+
+    /* Draw rotating wheels */
+    drawWheel(0.0f, -0.15f, 0.1f, wheelAngle);
+    drawWheel(0.6f, -0.15f, 0.1f, wheelAngle);
+
+    glFlush();
+}
+
+/* Timer function for animation */
+void animate(int value)
+{
+    wheelAngle += 4.0f;
+    if (wheelAngle >= 360.0f)
+        wheelAngle = 0.0f;
+
+    glutPostRedisplay();
+    glutTimerFunc(30, animate, 0);
+}
+
+/* Initialization */
+void init()
+{
+    glClearColor(0.8f, 0.0f, 0.0f, 1.0f);
+    glOrtho(-1, 1, -1, 1, -1, 1);
+}
+
+/* Main function */
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(600, 600);
+    glutCreateWindow("2D Car with Rotating Wheels");
+
+    init();
+    glutDisplayFunc(display);
+    glutTimerFunc(30, animate, 0);
+    glutMainLoop();
+
+    return 0;
+}
